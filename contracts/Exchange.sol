@@ -7,10 +7,44 @@ import "./Token.sol";
 contract Exchange {
     address public feeAccount;
     uint256 public feePercent;
-    mapping(address => mapping(address => uint256)) public tokens;
+    uint256 public orderCount;
 
-    event Deposit(address token, address user, uint256 amount, uint256 balance);
-    event Withdraw(address token, address user, uint256 amount, uint256 balance);
+    mapping(address => mapping(address => uint256)) public tokens;
+    mapping(uint256 => _Order) public orders;
+
+    event Deposit(
+        address token,
+        address user,
+        uint256 amount,
+        uint256 balance
+    );
+    event Withdraw(
+        address token,
+        address user,
+        uint256 amount,
+        uint256 balance
+    );
+    event Order(
+        uint256 id,
+        address user,
+        address tokenGet,
+        uint256 amountGet,
+        address tokenGive,
+        uint256 amountGive,
+        uint256 timestamp
+    );
+
+    // a way to model the order
+    struct _Order {
+        // Attributes of an order
+        uint256 id; // Unique identifier for order
+        address user; // User who made order
+        address tokenGet;
+        uint256 amountGet;
+        address tokenGive;
+        uint256 amountGive;
+        uint256 timestamp; // when order was created
+    }
 
     constructor(address _feeAccount, uint256 _feePercent) {
         feeAccount = _feeAccount;
@@ -26,6 +60,7 @@ contract Exchange {
         // emit an event
         emit Deposit(_token, msg.sender, _amount, tokens[_token][msg.sender]);
     }
+
     // Withdraw Tokens
     function withdrawToken(address _token, uint256 _amount) public {
         //Ensure user has enough tokens to withdraw
@@ -37,13 +72,49 @@ contract Exchange {
         // Emit event
         emit Withdraw(_token, msg.sender, _amount, tokens[_token][msg.sender]);
     }
+
     // Check Balances
-    function balanceOf(address _token, address _user)
-        public
-        view
-        returns (uint256)
-    {
+    function balanceOf(
+        address _token,
+        address _user
+    ) public view returns (uint256) {
         return tokens[_token][_user];
     }
-    
+
+    // Make & Cancel orders
+
+    // Token Give (the token they want to spend) - which token, and how much
+    // Token Get (the token they want to receive) - which token, and how much
+    function makeOrder(
+        address _tokenGet,
+        uint256 _amountGet,
+        address _tokenGive,
+        uint256 _amountGive
+    ) public {
+        // Prevent orders if tokens arent on exchange
+        require(balanceOf(_tokenGive, msg.sender) >= _amountGive, 'no balance');
+
+        // Create Order
+        orderCount = orderCount + 1;
+        orders[orderCount] = _Order(
+            orderCount, // id
+            msg.sender, // user '0x000...23423w0rewre'
+            _tokenGet,
+            _amountGet,
+            _tokenGive,
+            _amountGive,
+            block.timestamp // timestamp
+        );
+
+        //Emit an Event
+        emit Order(
+            orderCount,
+            msg.sender,
+            _tokenGet,
+            _amountGet,
+            _tokenGive,
+            _amountGive,
+            block.timestamp
+        );
+    }
 }
