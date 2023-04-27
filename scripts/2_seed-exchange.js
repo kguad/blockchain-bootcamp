@@ -22,10 +22,10 @@ async function main() {
     console.log(`KGC Token fetched: ${Kgc.address}\n`)
 
     const mETH = await ethers.getContractAt('Token', config[chainId].mETH.address)
-    console.log(`KGC Token fetched: ${mETH.address}\n`)
+    console.log(`mETH Token fetched: ${mETH.address}\n`)
 
     const mDAI = await ethers.getContractAt('Token', config[chainId].mDAI.address)
-    console.log(`KGC Token fetched: ${mDAI.address}\n`)
+    console.log(`mDAI Token fetched: ${mDAI.address}\n`)
 
     // Fetch the deployed exchange
     const exchange = await ethers.getContractAt('Exchange', config[chainId].exchange.address)
