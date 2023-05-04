@@ -38,7 +38,6 @@ const Balance = () => {
     // [] Step 5. Handle transfer fails
     // [] Step 6. 
 
-
     const depositHandler = (e, token) => {
         e.preventDefault()
 
